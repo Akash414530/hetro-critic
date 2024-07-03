@@ -3,23 +3,37 @@ import { useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import NotFound from "../components/NotFound";
+import Loading from "../components/Loading"; // Make sure to import your Loading component
 import { useAllPost } from "../contexts/AllPostsProvider";
 import "../styles/Post.css";
 
 export default function Post() {
   const [post, setPost] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { titleUrl } = useParams();
-  console.log(titleUrl)
+  console.log(titleUrl);
   const allPosts = useAllPost();
 
   useEffect(() => {
     const foundPost = allPosts
       .flatMap((group) => group.sectionPosts)
-      .find((p) => p.title.toLowerCase().replace(/[\s#!?,.:;'"()&@$%*+=[\]{}/\\|]/g, "-") === titleUrl);
+      .find(
+        (p) =>
+          p.title
+            .toLowerCase()
+            .replace(/[\s#!?,.:;'"()&@$%*+=[\]{}/\\|]/g, "-") === titleUrl
+      );
 
-    setPost(foundPost);
+    if (foundPost) {
+      setPost(foundPost);
+      setIsLoading(false);
+    }
   }, [titleUrl, allPosts]);
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   if (!post) {
     return <NotFound />;
